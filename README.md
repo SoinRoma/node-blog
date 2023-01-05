@@ -7,7 +7,7 @@
 
 ### Используемые технологии
 
-![Node.js](https://img.shields.io/badge/-Nodejs-black?style=flat-square&logo=nodejs)
+![Node.js](https://img.shields.io/badge/-Node.js-black?style=flat-square&logo=node.js)
 ![Express](https://img.shields.io/badge/-Express-black?style=flat-square&logo=express)
 ![Ejs](https://img.shields.io/badge/-Ejs-black?style=flat-square&logo=ejs)
 ![Mongoose](https://img.shields.io/badge/-Mongoose-black?style=flat-square&logo=mongoose)
