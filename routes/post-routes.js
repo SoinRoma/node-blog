@@ -1,6 +1,6 @@
 const express = require('express');
 const {
-  getPost,
+  getPost, 
   deletePost,
   getEditPost,
   editPost,
