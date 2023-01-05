@@ -1,11 +1,32 @@
 const express = require('express');
 const path = require('path');
+const morgan = require('morgan');
+const mongoose = require('mongoose');
+const Post = require('./models/post');
+const Contact = require('./models/contact');
+
 const PORT = 3000;
 const app = express();
+const db = 'mongodb+srv://admin:123@cluster.s8r7jzz.mongodb.net/node_blog?retryWrites=true&w=majority';
+
+mongoose.set('strictQuery', false);
+mongoose.connect(db).then(() => {
+  console.log('Coonect to DB');
+}).catch((error) => {
+  console.log(error);
+})
+
+
+app.set('view engine', 'ejs');
+
 
 const createPath = (page) => path.resolve(__dirname, 'ejs-views', `${page}.ejs`);
 
-app.set('view engine', 'ejs');
+app.listen(PORT, (error) => {
+  error ? console.log(error) : console.log(`listening port ${PORT}`);
+});
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
 
 app.use(express.urlencoded({
   extended: false
@@ -22,54 +43,64 @@ app.get('/', (req, res) => {
 
 app.get('/contacts', (req, res) => {
   const title = 'Contacts';
-  const contacts = [{
-      name: 'YouTube',
-      link: 'http://youtube.com'
-    },
-    {
-      name: 'Twitter',
-      link: 'http://github.com'
-    },
-    {
-      name: 'GitHub',
-      link: 'http://twitter.com'
-    },
-  ];
-  res.render(createPath('contacts'), {
-    contacts,
-    title
-  });
+  Contact
+    .find()
+    .then((contacts) => {
+      res.render(createPath('contacts'), {
+        contacts,
+        title
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.render(createPath('error'), {
+        title: 'Error'
+      });
+    })
 });
 
 app.get('/posts/:id', (req, res) => {
   const title = 'Post';
-  const post = {
-    id: '1',
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente quidem provident, dolores, vero laboriosam nemo mollitia impedit unde fugit sint eveniet, minima odio ipsum sed recusandae aut iste aspernatur dolorem.',
-    title: 'Post title',
-    date: '05.05.2021',
-    author: 'Yauhen',
-  };
-  res.render(createPath('post'), {
-    title,
-    post
-  });
+  Post
+    .findById(req.params.id)
+    .then((post) => {
+      res.render(createPath('post'), {
+        post,
+        title
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.render(createPath('error'), {
+        title: 'Error'
+      });
+    })
 });
+
+
 
 app.get('/posts', (req, res) => {
   const title = 'Posts';
-  const posts = [{
-    id: '1',
-    text: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Sapiente quidem provident, dolores, vero laboriosam nemo mollitia impedit unde fugit sint eveniet, minima odio ipsum sed recusandae aut iste aspernatur dolorem.',
-    title: 'Post title',
-    date: '05.05.2021',
-    author: 'Yauhen',
-  }];
-  res.render(createPath('posts'), {
-    title,
-    posts
-  });
+  Post
+    .find()
+    .sort({
+      createdAt: -1
+    })
+    .then((posts) => {
+      res.render(createPath('posts'), {
+        posts,
+        title
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.render(createPath('error'), {
+        title: 'Error'
+      });
+    })
 });
+
+
 
 app.post('/add-post', (req, res) => {
   const {
@@ -77,18 +108,22 @@ app.post('/add-post', (req, res) => {
     author,
     text
   } = req.body;
-  const post = {
-    id: new Date(),
-    date: (new Date()).toLocaleDateString(),
+  const post = new Post({
     title,
     author,
-    text,
-  };
-  res.render(createPath('post'), {
-    post,
-    title
+    text
   });
+  post
+    .save()
+    .then((result) => res.redirect('/posts'))
+    .catch((error) => {
+      console.log(error);
+      res.render(createPath('error'), {
+        title: 'Error'
+      });
+    })
 });
+
 
 app.get('/add-post', (req, res) => {
   const title = 'Add Post';
@@ -104,8 +139,4 @@ app.use((req, res) => {
     .render(createPath('error'), {
       title
     });
-});
-
-app.listen(PORT, (error) => {
-  error ? console.log(error) : console.log(`listening port ${PORT}`);
 });
