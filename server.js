@@ -12,8 +12,7 @@ const app = express();
 app.set("view engine", "ejs");
 
 const PORT = 3000;
-const db =
-  "mongodb+srv://admin:123@cluster.s8r7jzz.mongodb.net/node_blog?retryWrites=true&w=majority";
+const db ="mongodb+srv://admin:123@cluster.w4gmjpf.mongodb.net/node_blog";
 
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
